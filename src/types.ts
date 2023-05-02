@@ -1,0 +1,1 @@
+export type QuickAppError = { message: string, stack: string };

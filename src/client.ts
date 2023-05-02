@@ -9,9 +9,10 @@ import type {
   SeverityLevel,
   UserFeedback,
 } from '@sentry/types';
-import { getSDKSource, logger } from '@sentry/utils';
+import { getSDKSource, logger, isError, isPlainObject } from '@sentry/utils';
 
 import { eventFromException, eventFromMessage } from '@sentry/browser';
+import { eventFromQuickAppError } from './eventbuilder';
 import { WINDOW } from '@sentry/browser';
 import type { Breadcrumbs } from '@sentry/browser';
 import type { QuickAppTransportOptions } from './transports/types';
@@ -45,6 +46,9 @@ export class QuickAppClient extends BaseClient<QuickAppClientOptions> {
    * @inheritDoc
    */
   public eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event> {
+    if (isPlainObject(exception) && exception.message && exception.stack && !isError(exception)) {
+      return eventFromQuickAppError(this._options.stackParser, exception, hint);
+    }
     return eventFromException(this._options.stackParser, exception, hint, this._options.attachStacktrace);
   }
 

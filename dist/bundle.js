@@ -7576,7 +7576,7 @@ function wrap$2(
  */
 function exceptionFromError(stackParser, ex) {
   // Get the frames first since Opera can lose the stack if we touch anything else first
-  const frames = parseStackFrames(stackParser, ex);
+  const frames = parseStackFrames$1(stackParser, ex);
 
   const exception = {
     type: ex && ex.name,
@@ -7624,7 +7624,7 @@ function eventFromPlainObject(
   };
 
   if (syntheticException) {
-    const frames = parseStackFrames(stackParser, syntheticException);
+    const frames = parseStackFrames$1(stackParser, syntheticException);
     if (frames.length) {
       // event.exception.values[0] has been set above
       (event.exception ).values[0].stacktrace = { frames };
@@ -7646,7 +7646,7 @@ function eventFromError(stackParser, ex) {
 }
 
 /** Parses stack frames from an error */
-function parseStackFrames(
+function parseStackFrames$1(
   stackParser,
   ex,
 ) {
@@ -7655,7 +7655,7 @@ function parseStackFrames(
   // reliably in other circumstances.
   const stacktrace = ex.stacktrace || ex.stack || '';
 
-  const popSize = getPopSize(ex);
+  const popSize = getPopSize$1(ex);
 
   try {
     return stackParser(stacktrace, popSize);
@@ -7669,7 +7669,7 @@ function parseStackFrames(
 // Based on our own mapping pattern - https://github.com/getsentry/sentry/blob/9f08305e09866c8bd6d0c24f5b0aabdd7dd6c59c/src/sentry/lang/javascript/errormapping.py#L83-L108
 const reactMinifiedRegexp = /Minified React error #\d+;/i;
 
-function getPopSize(ex) {
+function getPopSize$1(ex) {
   if (ex) {
     if (typeof ex.framesToPop === 'number') {
       return ex.framesToPop;
@@ -7830,7 +7830,7 @@ function eventFromString(
   };
 
   if (attachStacktrace && syntheticException) {
-    const frames = parseStackFrames(stackParser, syntheticException);
+    const frames = parseStackFrames$1(stackParser, syntheticException);
     if (frames.length) {
       event.exception = {
         values: [{ value: input, stacktrace: { frames } }],
@@ -10836,6 +10836,58 @@ function getMetaContent(metaName) {
   return metaTag ? metaTag.getAttribute('content') : null;
 }
 
+function eventFromQuickAppError(stackParser, exception, hint) {
+    const frames = parseStackFrames(stackParser, exception);
+    const event = {
+        exception: {
+            values: [Object.assign(Object.assign({}, extractTypeAndValue(exception)), { stacktrace: { frames } })],
+        },
+    };
+    addExceptionMechanism(event); // defaults to { type: 'generic', handled: true }
+    event.level = 'error';
+    if (hint && hint.event_id) {
+        event.event_id = hint.event_id;
+    }
+    return resolvedSyncPromise(event);
+}
+function extractTypeAndValue(ex) {
+    const { stack } = ex;
+    if (stack) {
+        const stackAry = stack.split('\n');
+        if (stackAry[0]) {
+            const regExp = /\s*:\s*/g;
+            const errorAry = stackAry[0].split(regExp);
+            return {
+                type: errorAry[2],
+                value: errorAry[3]
+            };
+        }
+    }
+    return {
+        type: 'Error',
+        value: '未知的错误类型'
+    };
+}
+function parseStackFrames(stackParser, ex) {
+    const stacktrace = ex.stacktrace || ex.stack || '';
+    const popSize = getPopSize(ex);
+    try {
+        return stackParser(stacktrace, popSize);
+    }
+    catch (e) {
+        // no-empty
+    }
+    return [];
+}
+function getPopSize(ex) {
+    if (ex) {
+        if (typeof ex.framesToPop === 'number') {
+            return ex.framesToPop;
+        }
+    }
+    return 0;
+}
+
 const BREADCRUMB_INTEGRATION_ID = 'Breadcrumbs';
 class QuickAppClient extends BaseClient {
     constructor(options) {
@@ -10857,6 +10909,9 @@ class QuickAppClient extends BaseClient {
      * @inheritDoc
      */
     eventFromException(exception, hint) {
+        if (isPlainObject(exception) && exception.message && exception.stack && !isError(exception)) {
+            return eventFromQuickAppError(this._options.stackParser, exception, hint);
+        }
         return eventFromException(this._options.stackParser, exception, hint, this._options.attachStacktrace);
     }
     /**
@@ -10911,9 +10966,10 @@ class QuickAppClient extends BaseClient {
 
 function makeFetchTransport(options, nativeFetch = fetch.fetch) {
     function makeRequest(request) {
+        console.log(request.body);
         try {
             return nativeFetch({
-                url: options.url,
+                url: 'options.url',
                 data: request.body,
                 method: 'POST',
                 header: options.headers,

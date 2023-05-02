@@ -12,10 +12,10 @@ export function makeFetchTransport(
 ): Transport {
 
   function makeRequest(request: TransportRequest): PromiseLike<TransportMakeRequestResponse> {
-
+    console.log(request.body)
     try {
       return nativeFetch({
-        url: options.url,
+        url: 'options.url',
         data: request.body,
         method: 'POST',
         header: options.headers,
