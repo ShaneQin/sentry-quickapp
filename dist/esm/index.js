@@ -1,5 +1,6 @@
 import fetch from '@system.fetch';
 import device from '@system.device';
+import app from '@system.app';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const objectToString = Object.prototype.toString;
@@ -10995,15 +10996,16 @@ class QuickAppInfo {
     constructor() {
         this.name = QuickAppInfo.id;
         this.deviceInfo = {};
-        console.log(123);
+        this.appInfo = {};
         setTimeout(() => {
             this.getDeviceInfo();
+            this.getAppInfo();
         });
     }
     setupOnce() {
         addGlobalEventProcessor((event) => {
             if (getCurrentHub().getIntegration(QuickAppInfo)) {
-                return Object.assign(Object.assign({}, event), { contexts: Object.assign(Object.assign({}, event.contexts), { device: this.deviceInfo }) });
+                return Object.assign(Object.assign({}, event), { contexts: Object.assign(Object.assign({}, event.contexts), { device: this.deviceInfo, app: this.appInfo }) });
             }
             return event;
         });
@@ -11015,6 +11017,9 @@ class QuickAppInfo {
                 this.deviceInfo = ret;
             }
         });
+    }
+    getAppInfo() {
+        this.appInfo = app.getInfo();
     }
 }
 QuickAppInfo.id = 'Quick App Info';
