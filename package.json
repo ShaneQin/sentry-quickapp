@@ -1,12 +1,12 @@
 {
-  "name": "sentry-quickapp",
-  "version": "1.0.0-beta.1",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
+  "name": "sentry-quickapp2",
+  "version": "1.0.0-beta.4",
+  "description": "快应用sentry",
+  "main": "dist/bundle.js",
+  "module": "dist/bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rollup -c"
+    "build": "rollup -c --bundleConfigAsCjs"
   },
   "repository": {
     "type": "git",
