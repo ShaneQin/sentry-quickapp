@@ -1,6 +1,6 @@
 {
   "name": "sentry-quickapp2",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "快应用sentry",
   "main": "dist/bundle.js",
   "module": "dist/bundle.js",
