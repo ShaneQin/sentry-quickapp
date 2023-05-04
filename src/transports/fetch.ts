@@ -15,7 +15,7 @@ export function makeFetchTransport(
     console.log(request.body)
     try {
       return nativeFetch({
-        url: 'options.url',
+        url: options.url,
         data: request.body,
         method: 'POST',
         header: options.headers,

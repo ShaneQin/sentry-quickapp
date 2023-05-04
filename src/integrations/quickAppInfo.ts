@@ -39,13 +39,24 @@ export class QuickAppInfo implements Integration {
   public getDeviceInfo() {
     device.getInfo({
       success: (ret) => {
-        console.log(ret)
-        this.deviceInfo = ret
+        this.deviceInfo = this._handleInfoData(ret)
       }
     })
   }
 
   public getAppInfo() {
-    this.appInfo = app.getInfo()
+    this.appInfo = this._handleInfoData(app.getInfo())
+  }
+
+  private _handleInfoData(info: Record<string, any>): Record<string, any> {
+    const handledInfo: Record<string, any> = {}
+    Object.keys(info).forEach(key => {
+      if (typeof info[key] === 'object') {
+        handledInfo[key] = JSON.stringify(info[key])
+      } else {
+        handledInfo[key] = info[key]
+      }
+    })
+    return handledInfo
   }
 }

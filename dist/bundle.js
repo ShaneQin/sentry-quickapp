@@ -10971,7 +10971,7 @@ function makeFetchTransport(options, nativeFetch = fetch.fetch) {
         console.log(request.body);
         try {
             return nativeFetch({
-                url: 'options.url',
+                url: options.url,
                 data: request.body,
                 method: 'POST',
                 header: options.headers,
@@ -11013,13 +11013,24 @@ class QuickAppInfo {
     getDeviceInfo() {
         device.getInfo({
             success: (ret) => {
-                console.log(ret);
-                this.deviceInfo = ret;
+                this.deviceInfo = this._handleInfoData(ret);
             }
         });
     }
     getAppInfo() {
-        this.appInfo = app.getInfo();
+        this.appInfo = this._handleInfoData(app.getInfo());
+    }
+    _handleInfoData(info) {
+        const handledInfo = {};
+        Object.keys(info).forEach(key => {
+            if (typeof info[key] === 'object') {
+                handledInfo[key] = JSON.stringify(info[key]);
+            }
+            else {
+                handledInfo[key] = info[key];
+            }
+        });
+        return handledInfo;
     }
 }
 QuickAppInfo.id = 'Quick App Info';
