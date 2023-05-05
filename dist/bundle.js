@@ -1,6 +1,7 @@
 import fetch from '@system.fetch';
 import device from '@system.device';
 import app from '@system.app';
+import network from '@system.network';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const objectToString = Object.prototype.toString;
@@ -10997,15 +10998,17 @@ class QuickAppInfo {
         this.name = QuickAppInfo.id;
         this.deviceInfo = {};
         this.appInfo = {};
+        this.networkInfo = {};
         setTimeout(() => {
             this.getDeviceInfo();
             this.getAppInfo();
+            this.getNetworkInfo();
         });
     }
     setupOnce() {
         addGlobalEventProcessor((event) => {
             if (getCurrentHub().getIntegration(QuickAppInfo)) {
-                return Object.assign(Object.assign({}, event), { contexts: Object.assign(Object.assign({}, event.contexts), { device: this.deviceInfo, app: this.appInfo }) });
+                return Object.assign(Object.assign({}, event), { contexts: Object.assign(Object.assign({}, event.contexts), { device: this.deviceInfo, app: this.appInfo, network: this.networkInfo }), tags: Object.assign(Object.assign({}, event.tags), { brand: this.deviceInfo.brand, 'package.name': this.appInfo.packageName, 'version.name': this.appInfo.versionName, 'version.code': this.appInfo.versionCode }) });
             }
             return event;
         });
@@ -11020,14 +11023,21 @@ class QuickAppInfo {
     getAppInfo() {
         this.appInfo = this._handleInfoData(app.getInfo());
     }
+    getNetworkInfo() {
+        network.getType({
+            success: (data) => {
+                this.networkInfo = this._handleInfoData(data);
+            }
+        });
+    }
     _handleInfoData(info) {
         const handledInfo = {};
         Object.keys(info).forEach(key => {
-            if (typeof info[key] === 'object') {
-                handledInfo[key] = JSON.stringify(info[key]);
+            if (typeof info[key] === 'string' || typeof info[key] === 'number') {
+                handledInfo[key] = info[key];
             }
             else {
-                handledInfo[key] = info[key];
+                handledInfo[key] = JSON.stringify(info[key]);
             }
         });
         return handledInfo;
