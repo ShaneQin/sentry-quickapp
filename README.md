@@ -1,7 +1,7 @@
 # sentry-quickapp 快应用Sentry SDK
 
-![npm version](https://img.shields.io/npm/v/sentry-miniapp)
-![npm download](https://img.shields.io/npm/dm/sentry-miniapp)
+![npm version](https://img.shields.io/npm/v/sentry-quickapp2)
+![npm download](https://img.shields.io/npm/dm/sentry-quickapp2)
 
 ## 功能
 
