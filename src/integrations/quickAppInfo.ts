@@ -2,16 +2,16 @@ import device from '@system.device';
 import app from '@system.app';
 import network from '@system.network';
 import { getCurrentHub, addGlobalEventProcessor } from '@sentry/core';
-import type { Event, Integration} from '@sentry/types';
+import type { AppContext, DeviceContext, Event, Integration} from '@sentry/types';
 
 export class QuickAppInfo implements Integration {
   public static id: string = 'Quick App Info';
 
   public name: string = QuickAppInfo.id;
 
-  public deviceInfo: Record<string, any> = {}
+  public deviceInfo = <IDeviceInfo>{}
 
-  public appInfo: Record<string, any> = {}
+  public appInfo = <IAppInfo>{}
 
   public networkInfo = {}
 
@@ -31,8 +31,8 @@ export class QuickAppInfo implements Integration {
           ...event,
           contexts: {
             ...event.contexts,
-            device: this.deviceInfo,
-            app: this.appInfo,
+            device: <DeviceContext><unknown>this.deviceInfo,
+            app: <AppContext><unknown>this.appInfo,
             network: this.networkInfo
           },
           tags: {
@@ -51,13 +51,13 @@ export class QuickAppInfo implements Integration {
   public getDeviceInfo() {
     device.getInfo({
       success: (ret) => {
-        this.deviceInfo = this._handleInfoData(ret)
+        this.deviceInfo = <IDeviceInfo>this._handleInfoData(ret)
       }
     })
   }
 
   public getAppInfo() {
-    this.appInfo = this._handleInfoData(app.getInfo())
+    this.appInfo = <IAppInfo>this._handleInfoData(app.getInfo())
   }
 
   public getNetworkInfo() {
@@ -68,7 +68,7 @@ export class QuickAppInfo implements Integration {
     })
   }
 
-  private _handleInfoData(info: Record<string, any>): Record<string, any> {
+  private _handleInfoData<T>(info: Record<string, any>): Record<string, any> {
     const handledInfo: Record<string, any> = {}
     Object.keys(info).forEach(key => {
       if (typeof info[key] === 'string' || typeof info[key] === 'number') {

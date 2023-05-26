@@ -1,4 +1,4 @@
-interface DeviceInfo {
+interface IDeviceInfo {
   brand: string;
   manufacturer: string;
   model: string;
@@ -14,7 +14,7 @@ interface DeviceInfo {
   deviceType: string;
 }
 
-interface AppInfo {
+interface IAppInfo {
   name: string;
   packageName: string;
   source: { packageName: string; type: string; extra: object };
